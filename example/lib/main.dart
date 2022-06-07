@@ -17,19 +17,13 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool isInit = false;
-  late LedgerTransport ledgerTransport;
-
-  @override
-  void initState() {
-    init();
-
-    super.initState();
-  }
+  LedgerTransport? ledgerTransport;
+  final keyNotifier = ValueNotifier<String?>(null);
 
   @override
   void dispose() {
     if (isInit) {
-      ledgerTransport.freePtr();
+      ledgerTransport?.freePtr();
     }
 
     super.dispose();
@@ -43,25 +37,68 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: ElevatedButton(
-            onPressed: () async {
-              if (isInit) {
-                ledgerTransport.exchange();
-              }
-            },
-            child: const Text(
-              'Get public key,',
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              ElevatedButton(
+                onPressed: ledgerTransport == null ? connectLedger : null,
+                child: const Text(
+                  'Connect ledger',
+                ),
+              ),
+              ValueListenableBuilder<String?>(
+                valueListenable: keyNotifier,
+                builder: (context, value, _) => SizedBox(
+                  height: 50,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: value == null
+                        ? const SizedBox()
+                        : value.isEmpty
+                            ? const CircularProgressIndicator()
+                            : Text(value),
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: ledgerTransport != null
+                    ? () async {
+                        keyNotifier.value = '';
+                        final key = await ledgerTransport!.getKey();
+                        if (key.isNotEmpty) {
+                          keyNotifier.value = key;
+                        } else {
+                          keyNotifier.value = null;
+                        }
+                      }
+                    : null,
+                child: const Text(
+                  'Get public key',
+                ),
+              ),
+              ElevatedButton(
+                onPressed: ledgerTransport != null ? disconnectLedger : null,
+                child: const Text(
+                  'Disconnect ledger',
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Future<void> init() async {
+  Future<void> connectLedger() async {
     ledgerTransport = await LedgerTransport.create();
+    setState(() {});
+  }
+
+  Future<void> disconnectLedger() async {
+    await ledgerTransport?.freePtr();
+    keyNotifier.value = null;
     setState(() {
-      isInit = true;
+      ledgerTransport = null;
     });
   }
 }

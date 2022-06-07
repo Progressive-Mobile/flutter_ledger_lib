@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:ffi';
 
+import 'package:convert/convert.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../flutter_ledger_lib.dart';
@@ -45,7 +47,7 @@ class LedgerTransport {
         _ptr = Pointer.fromAddress(result).cast<Void>();
       });
 
-  Future<void> exchange() async {
+  Future<String> getKey() async {
     final ptr = await clonePtr();
 
     final result = await executeAsync(
@@ -55,8 +57,9 @@ class LedgerTransport {
       ),
     );
 
-    final id = cStringToDart(result);
+    final string = cStringToDart(result);
+    final key = (jsonDecode(string) as List<dynamic>).cast<int>();
 
-    return;
+    return key.isNotEmpty ? hex.encode(key.skip(1).take(key[0]).toList()) : '';
   }
 }
