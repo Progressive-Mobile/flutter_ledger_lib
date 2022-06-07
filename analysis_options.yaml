@@ -1,0 +1,24 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    avoid_classes_with_only_static_members: false
+    prefer_single_quotes: true
+    prefer_relative_imports: true
+    always_use_package_imports: false
+
+analyzer:
+  language:
+    strict-inference: true
+  exclude:
+    - lib/**.g.dart
+    - lib/**.gen.dart
+    - lib/**.gr.dart
+    - lib/**.freezed.dart
+    - lib/**.config.dart
+  errors:
+    missing_return: error
+    missing_required_param: error
+    parameter_assignments: error
+    invalid_annotation_target: ignore
+

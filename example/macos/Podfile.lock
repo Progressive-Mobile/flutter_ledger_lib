@@ -1,0 +1,22 @@
+PODS:
+  - flutter_ledger_lib (0.0.1):
+    - FlutterMacOS
+  - FlutterMacOS (1.0.0)
+
+DEPENDENCIES:
+  - flutter_ledger_lib (from `Flutter/ephemeral/.symlinks/plugins/flutter_ledger_lib/macos`)
+  - FlutterMacOS (from `Flutter/ephemeral`)
+
+EXTERNAL SOURCES:
+  flutter_ledger_lib:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_ledger_lib/macos
+  FlutterMacOS:
+    :path: Flutter/ephemeral
+
+SPEC CHECKSUMS:
+  flutter_ledger_lib: a487cf366040c752365bd4794d7c5bcb5e5ec28d
+  FlutterMacOS: 57701585bf7de1b3fc2bb61f6378d73bbdea8424
+
+PODFILE CHECKSUM: 6eac6b3292e5142cfc23bdeb71848a40ec51c14c
+
+COCOAPODS: 1.11.3
