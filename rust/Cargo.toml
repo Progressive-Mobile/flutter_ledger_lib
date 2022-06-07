@@ -10,7 +10,7 @@ crate-type = ["staticlib", "cdylib"]
 [dependencies]
 allo-isolate = "0.1.12"
 lazy_static = "1.4.0"
-ledger-transport-hid = { git = "https://github.com/Zondax/ledger-rs.git"}
-ledger-transport = { git = "https://github.com/Zondax/ledger-rs.git"}
+ledger-transport-hid = { git = "https://github.com/Progressive-Mobile/ledger-rs.git" }
+ledger-transport = { git = "https://github.com/Progressive-Mobile/ledger-rs.git" }
 serde_json = "1.0.79"
 tokio = { version = "1.17.0", features = [ "full" ] }
