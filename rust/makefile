@@ -21,6 +21,9 @@ help: makefile
 init:
 	rustup override set nightly
 	rustup target add aarch64-apple-darwin x86_64-apple-darwin
+	rustup target add x86_64-pc-windows-gnu
+	rustup toolchain install stable-x86_64-pc-windows-gnu
+	cargo build --target x86_64-pc-windows-gnu --release
 	@if [ $$(uname) == "Darwin" ] ; then cargo install cargo-lipo ; fi
 	cargo install cbindgen
 
