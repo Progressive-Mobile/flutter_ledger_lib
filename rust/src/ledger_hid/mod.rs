@@ -1,0 +1,54 @@
+mod ledger_hid_transport;
+
+use std::{ffi::c_void, os::raw::c_longlong, sync::Arc};
+
+use crate::{
+    models::{HandleError, MatchResult, ToCStringPtr},
+    runtime, send_to_result_port, RUNTIME,
+};
+
+use self::ledger_hid_transport::LedgerHidTransport;
+
+#[no_mangle]
+pub unsafe extern "C" fn create_ledger_transport() -> *mut c_void {
+    fn internal_fn() -> Result<u64, String> {
+        let transport = LedgerHidTransport::new().handle_error()?;
+
+        let ptr = Box::into_raw(Box::new(Arc::new(transport))) as u64;
+
+        Ok(ptr)
+    }
+
+    internal_fn().match_result()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ledger_transport_clone_ptr(ptr: *mut c_void) -> *mut c_void {
+    Arc::into_raw(Arc::clone(&*(ptr as *mut Arc<LedgerHidTransport>))) as *mut c_void
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ledger_transport_free_ptr(ptr: *mut c_void) {
+    Box::from_raw(ptr as *mut Arc<LedgerHidTransport>);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ledger_exchange(result_port: c_longlong, transport: *mut c_void) {
+    let transport = Arc::from_raw(transport as *mut LedgerHidTransport);
+
+    runtime!().spawn(async move {
+        fn internal_fn(transport: Arc<LedgerHidTransport>) -> Result<u64, String> {
+            let result = transport
+                .exchange(0xe0, 0x02, 0x00, 0x00, vec![0x00, 0x00, 0x00, 0x00])
+                .unwrap();
+
+            let result = serde_json::to_string(&result);
+
+            Ok(result.handle_error()?.to_cstring_ptr() as u64)
+        }
+
+        let result = internal_fn(transport).match_result();
+
+        send_to_result_port(result_port, result);
+    });
+}

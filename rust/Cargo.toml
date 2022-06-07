@@ -1,0 +1,16 @@
+[package]
+name = "flutter_ledger_lib"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "flutter_ledger_lib"
+crate-type = ["staticlib", "cdylib"]
+
+[dependencies]
+allo-isolate = "0.1.12"
+lazy_static = "1.4.0"
+ledger-transport-hid = { git = "https://github.com/Zondax/ledger-rs.git"}
+ledger-transport = { git = "https://github.com/Zondax/ledger-rs.git"}
+serde_json = "1.0.79"
+tokio = { version = "1.17.0", features = [ "full" ] }
