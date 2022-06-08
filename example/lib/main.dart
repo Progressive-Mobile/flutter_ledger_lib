@@ -20,6 +20,7 @@ class _MyAppState extends State<MyApp> {
   LedgerTransport? ledgerTransport;
   final keyNotifier = ValueNotifier<String?>(null);
   int keyIndex = 0;
+  String errorText = '';
 
   @override
   void dispose() {
@@ -61,6 +62,7 @@ class _MyAppState extends State<MyApp> {
                   ),
                 ),
               ),
+              Text(errorText.isNotEmpty ? 'Error: $errorText' : ''),
               Text('Key index = $keyIndex'),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -91,20 +93,27 @@ class _MyAppState extends State<MyApp> {
               ElevatedButton(
                 onPressed: ledgerTransport != null
                     ? () async {
-                        keyNotifier.value = '';
-                        final key = await ledgerTransport!.getKey(keyIndex);
-                        // final key = await ledgerTransport!.signMessage(
-                        //   keyIndex: 0,
-                        //   address: 'some64LenghtValue',
-                        //   destination: '0:some64LenghtValue2',
-                        //   decimals: 9,
-                        //   amount: 1000000000,
-                        //   asset: 'VENOM',
-                        // );
-                        if (key.isNotEmpty) {
-                          keyNotifier.value = key;
-                        } else {
-                          keyNotifier.value = null;
+                        try {
+                          keyNotifier.value = '';
+                          final key = await ledgerTransport!.getKey(keyIndex);
+                          // final key = await ledgerTransport!.signMessage(
+                          //   keyIndex: 0,
+                          //   address: 'some64LenghtValue',
+                          //   destination: '0:some64LenghtValue2',
+                          //   decimals: 9,
+                          //   amount: 1000000000,
+                          //   asset: 'VENOM',
+                          // );
+                          setState(() {
+                            errorText = '';
+                          });
+                          if (key.isNotEmpty) {
+                            keyNotifier.value = key;
+                          } else {
+                            keyNotifier.value = null;
+                          }
+                        } catch (err) {
+                          _mapError(err);
                         }
                       }
                     : null,
@@ -125,9 +134,25 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  void _mapError(Object err) {
+    if (err is LedgerError) {
+      setState(() {
+        keyNotifier.value = null;
+        errorText = err.when(
+          connectionError: (error) => error,
+          responseError: (sw) => sw.toString(),
+        );
+      });
+    }
+  }
+
   Future<void> connectLedger() async {
-    ledgerTransport = await LedgerTransport.create();
-    setState(() {});
+    try {
+      ledgerTransport = await LedgerTransport.create();
+      setState(() {});
+    } catch (err) {
+      _mapError(err);
+    }
   }
 
   Future<void> disconnectLedger() async {
