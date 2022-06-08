@@ -102,17 +102,34 @@ class Bindings {
   void ledger_exchange(
     int result_port,
     ffi.Pointer<ffi.Void> transport,
+    int cla,
+    int ins,
+    int p1,
+    int p2,
+    ffi.Pointer<ffi.Char> data,
   ) {
     return _ledger_exchange(
       result_port,
       transport,
+      cla,
+      ins,
+      p1,
+      p2,
+      data,
     );
   }
 
   late final _ledger_exchangePtr = _lookup<
       ffi.NativeFunction<
           ffi.Void Function(
-              ffi.LongLong, ffi.Pointer<ffi.Void>)>>('ledger_exchange');
-  late final _ledger_exchange = _ledger_exchangePtr
-      .asFunction<void Function(int, ffi.Pointer<ffi.Void>)>();
+              ffi.LongLong,
+              ffi.Pointer<ffi.Void>,
+              ffi.Int,
+              ffi.Int,
+              ffi.Int,
+              ffi.Int,
+              ffi.Pointer<ffi.Char>)>>('ledger_exchange');
+  late final _ledger_exchange = _ledger_exchangePtr.asFunction<
+      void Function(int, ffi.Pointer<ffi.Void>, int, int, int, int,
+          ffi.Pointer<ffi.Char>)>();
 }

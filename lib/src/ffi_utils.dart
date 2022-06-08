@@ -5,7 +5,7 @@ import 'dart:isolate';
 import 'package:ffi/ffi.dart';
 
 import 'bindings.dart';
-import 'models/execution_result.dart';
+import 'model/execution_result.dart';
 
 int executeSync(Pointer<Void> Function() function) {
   final ptr = function();
