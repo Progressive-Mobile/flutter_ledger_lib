@@ -11,4 +11,10 @@ void *ledger_transport_clone_ptr(void *ptr);
 
 void ledger_transport_free_ptr(void *ptr);
 
-void ledger_exchange(long long result_port, void *transport);
+void ledger_exchange(long long result_port,
+                     void *transport,
+                     int cla,
+                     int ins,
+                     int p1,
+                     int p2,
+                     char *data);

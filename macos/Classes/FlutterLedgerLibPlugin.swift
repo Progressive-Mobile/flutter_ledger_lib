@@ -29,7 +29,7 @@ public class FlutterLedgerLibPlugin: NSObject, FlutterPlugin {
 
       ledger_transport_free_ptr(nil)
 
-      ledger_exchange(0, nil)
+      ledger_exchange(0, nil, 0, 0, 0, 0, nil)
 
       lb_store_dart_post_cobject(nil)
   }
