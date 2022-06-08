@@ -19,6 +19,7 @@ class _MyAppState extends State<MyApp> {
   bool isInit = false;
   LedgerTransport? ledgerTransport;
   final keyNotifier = ValueNotifier<String?>(null);
+  int keyIndex = 0;
 
   @override
   void dispose() {
@@ -60,11 +61,46 @@ class _MyAppState extends State<MyApp> {
                   ),
                 ),
               ),
+              Text('Key index = $keyIndex'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        if (keyIndex > 0) {
+                          --keyIndex;
+                        }
+                      });
+                    },
+                    icon: const Text('-1'),
+                  ),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        ++keyIndex;
+                      });
+                    },
+                    icon: const Text('+1'),
+                  ),
+                ],
+              ),
               ElevatedButton(
                 onPressed: ledgerTransport != null
                     ? () async {
                         keyNotifier.value = '';
-                        final key = await ledgerTransport!.getKey();
+                        final key = await ledgerTransport!.getKey(keyIndex);
+                        // final key = await ledgerTransport!.signMessage(
+                        //   keyIndex: 0,
+                        //   address: 'some64LenghtValue',
+                        //   destination: '0:some64LenghtValue2',
+                        //   decimals: 9,
+                        //   amount: 1000000000,
+                        //   asset: 'VENOM',
+                        // );
                         if (key.isNotEmpty) {
                           keyNotifier.value = key;
                         } else {
