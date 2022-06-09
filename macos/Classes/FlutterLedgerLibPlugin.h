@@ -1,4 +1,3 @@
-
 void free_execution_result(void *ptr);
 
 void free_cstring(char *ptr);

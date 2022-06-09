@@ -15,8 +15,9 @@ A new Flutter plugin project.
 
   s.source           = { :path => '.' }
   s.source_files     = 'Classes/**/*'
+  s.public_header_files = 'Classes**/*.h'
   s.static_framework = true
-  s.vendored_libraries = '**/*.a'
+  s.vendored_libraries = '**/*.dylib'
   s.dependency 'FlutterMacOS'
 
   s.platform = :osx, '10.11'
