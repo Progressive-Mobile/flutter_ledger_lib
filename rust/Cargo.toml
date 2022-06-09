@@ -14,4 +14,4 @@ ledger-transport-hid = { git = "https://github.com/Progressive-Mobile/ledger-rs.
 ledger-transport = { git = "https://github.com/Progressive-Mobile/ledger-rs.git" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.79"
-tokio = { version = "1.17.0", features = [ "full" ] }
+tokio = { version = "1.17.0", features = [ "rt-multi-thread", "sync" ] }
