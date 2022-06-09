@@ -146,9 +146,9 @@ class LedgerTransport {
         );
 
         final string = cStringToDart(result);
-        final key = (jsonDecode(string) as List<dynamic>).cast<int>();
+        final signature = (jsonDecode(string) as List<dynamic>).cast<int>();
 
-        return key.isNotEmpty ? hex.encode(key.skip(1).take(key[0]).toList()) : '';
+        return signature.isNotEmpty ? hex.encode(signature.skip(1).take(signature[0]).toList()) : '';
       },
     );
   }
