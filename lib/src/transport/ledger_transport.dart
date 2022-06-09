@@ -142,11 +142,16 @@ class LedgerTransport {
             0x00,
             0x00,
             data.toNativeUtf8().cast<Char>(),
-          ) ,
+          ),
         );
-
         final string = cStringToDart(result);
-        final signature = (jsonDecode(string) as List<dynamic>).cast<int>();
+        final json = jsonDecode(string) as Map<String, dynamic>;
+        final response = LedgerResponse.fromJson(json);
+
+        if (response.statusWord != StatusWord.success) {
+          throw LedgerError.responseError(statusWord: response.statusWord);
+        }
+        final signature = response.data;
 
         return signature.isNotEmpty ? hex.encode(signature.skip(1).take(signature[0]).toList()) : '';
       },
