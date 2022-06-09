@@ -23,9 +23,7 @@ abstract class FlutterLedgerLib {
   }
 
   static DynamicLibrary _dlOpenPlatformSpecific() {
-    if (Platform.isAndroid) {
-      return DynamicLibrary.open('flutter_ledger_lib.so');
-    } else if (Platform.isIOS || Platform.isMacOS) {
+    if (Platform.isMacOS) {
       return DynamicLibrary.process();
     } else if (Platform.isWindows) {
       return DynamicLibrary.open('flutter_ledger_lib.dll');

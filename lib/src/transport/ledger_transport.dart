@@ -13,8 +13,11 @@ import 'ledger_response.dart';
 
 class LedgerTransport {
   static const _cla = 0xe0;
+  static const _confCla = 0xb0;
+  static const _insGetConf = 0x01;
   static const _insGetPk = 0x02;
   static const _insSign = 0x03;
+  static const _ledgerSystemName = 'BOLOS';
 
   final _lock = Lock();
   Pointer<Void>? _ptr;
@@ -22,10 +25,17 @@ class LedgerTransport {
   LedgerTransport._();
 
   static Future<LedgerTransport> create() async {
+    final instance = LedgerTransport._();
     try {
-      final instance = LedgerTransport._();
       await instance._initialize();
+      final name = await instance.getAppName();
+      if (name == _ledgerSystemName) {
+        await instance.freePtr();
+        throw const LedgerError.responseError(statusWord: StatusWord.appIsNotOpen);
+      }
       return instance;
+    } on LedgerError {
+      rethrow;
     } catch (err) {
       throw LedgerError.connectionError(origMessage: err.toString());
     }
@@ -63,34 +73,32 @@ class LedgerTransport {
     final ptr = await clonePtr();
     final keyIndexRawValue = jsonEncode(keyIndex.toUint8List());
 
-    try {
-      final result = await executeAsync(
-        (port) => FlutterLedgerLib.bindings.ledger_exchange(
-          port,
-          ptr,
-          _cla,
-          _insGetPk,
-          verify ? 0x01 : 0x00,
-          0x00,
-          keyIndexRawValue.toNativeUtf8().cast<Char>(),
-        ),
-      );
-      final string = cStringToDart(result);
-      final json = jsonDecode(string) as Map<String, dynamic>;
-      final response = LedgerResponse.fromJson(json);
+    return _executeLedgerQuery(
+      () async {
+        final result = await executeAsync(
+          (port) => FlutterLedgerLib.bindings.ledger_exchange(
+            port,
+            ptr,
+            _cla,
+            _insGetPk,
+            verify ? 0x01 : 0x00,
+            0x00,
+            keyIndexRawValue.toNativeUtf8().cast<Char>(),
+          ),
+        );
+        final string = cStringToDart(result);
+        final json = jsonDecode(string) as Map<String, dynamic>;
+        final response = LedgerResponse.fromJson(json);
 
-      if (response.statusWord != StatusWord.success) {
-        throw LedgerError.responseError(statusWord: response.statusWord);
-      }
+        if (response.statusWord != StatusWord.success) {
+          throw LedgerError.responseError(statusWord: response.statusWord);
+        }
 
-      final key = response.data;
+        final key = response.data;
 
-      return key.isNotEmpty ? hex.encode(key.skip(1).take(key[0]).toList()) : '';
-    } on LedgerError {
-      rethrow;
-    } catch (err) {
-      throw const LedgerError.responseError(statusWord: StatusWord.unknownError);
-    }
+        return key.isNotEmpty ? hex.encode(key.skip(1).take(key[0]).toList()) : '';
+      },
+    );
   }
 
   Future<String> signMessage({
@@ -122,23 +130,65 @@ class LedgerTransport {
       ...destinationBytes,
       ...addressBytes,
     ]));
+
+    return _executeLedgerQuery(
+      () async {
+        final result = await executeAsync(
+          (port) => FlutterLedgerLib.bindings.ledger_exchange(
+            port,
+            ptr,
+            _cla,
+            _insSign,
+            0x00,
+            0x00,
+            data.toNativeUtf8().cast<Char>(),
+          ) ,
+        );
+
+        final string = cStringToDart(result);
+        final key = (jsonDecode(string) as List<dynamic>).cast<int>();
+
+        return key.isNotEmpty ? hex.encode(key.skip(1).take(key[0]).toList()) : '';
+      },
+    );
+  }
+
+  Future<String> getAppName() async {
+    final ptr = await clonePtr();
+    final keyIndexRawValue = jsonEncode([]);
+
+    return _executeLedgerQuery(
+      () async {
+        final result = await executeAsync(
+          (port) => FlutterLedgerLib.bindings.ledger_exchange(
+            port,
+            ptr,
+            _confCla,
+            _insGetConf,
+            0x00,
+            0x00,
+            keyIndexRawValue.toNativeUtf8().cast<Char>(),
+          ),
+        );
+        final string = cStringToDart(result);
+        final json = jsonDecode(string) as Map<String, dynamic>;
+        final response = LedgerResponse.fromJson(json);
+
+        if (response.statusWord != StatusWord.success) {
+          throw LedgerError.responseError(statusWord: response.statusWord);
+        }
+
+        final nameBytes = response.data.skip(2).take(response.data[1]).toList();
+        final name = String.fromCharCodes(nameBytes);
+
+        return name;
+      },
+    );
+  }
+
+  Future<T> _executeLedgerQuery<T>(Future<T> Function() query) async {
     try {
-      final result = await executeAsync(
-        (port) => FlutterLedgerLib.bindings.ledger_exchange(
-          port,
-          ptr,
-          _cla,
-          _insSign,
-          0x00,
-          0x00,
-          data.toNativeUtf8().cast<Char>(),
-        ),
-      );
-
-      final string = cStringToDart(result);
-      final key = (jsonDecode(string) as List<dynamic>).cast<int>();
-
-      return key.isNotEmpty ? hex.encode(key.skip(1).take(key[0]).toList()) : '';
+      return await query();
     } on LedgerError {
       rethrow;
     } catch (err) {
