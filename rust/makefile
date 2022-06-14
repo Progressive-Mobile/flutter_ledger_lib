@@ -36,16 +36,16 @@ init:
 all: macos windows bindings
 
 ## macos: Compile the macOS libraries
-macos: target/x86_64-apple-darwin/release/libexample.dylib target/aarch64-apple-darwin/release/libexample.dylib
+macos: target/x86_64-apple-darwin/release/libflutter_ledger_lib.dylib target/aarch64-apple-darwin/release/libflutter_ledger_lib.dylib
 
-target/x86_64-apple-darwin/release/libexample.dylib: $(SOURCES)
+target/x86_64-apple-darwin/release/libflutter_ledger_lib.dylib: $(SOURCES)
 	@if [ $$(uname) == "Darwin" ] ; then \
 		cargo lipo --release --targets x86_64-apple-darwin ; \
 		else echo "Skipping macOS compilation on $$(uname)" ; \
 	fi
 	@echo "[DONE] $@"
 
-target/aarch64-apple-darwin/release/libexample.dylib: $(SOURCES)
+target/aarch64-apple-darwin/release/libflutter_ledger_lib.dylib: $(SOURCES)
 	@if [ $$(uname) == "Darwin" ] ; then \
 		cargo lipo --release --targets aarch64-apple-darwin ; \
 		else echo "Skipping macOS compilation on $$(uname)" ; \
