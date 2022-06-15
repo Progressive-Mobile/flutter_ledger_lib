@@ -121,10 +121,29 @@ class _MyAppState extends State<MyApp> {
                   'Get public key',
                 ),
               ),
-              ElevatedButton(
-                onPressed: ledgerTransport != null ? disconnectLedger : null,
-                child: const Text(
-                  'Disconnect ledger',
+              GestureDetector(
+                onTap: ledgerTransport != null ? disconnectLedger : null,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                  width: 200,
+                  decoration: ShapeDecoration(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    gradient: const LinearGradient(
+                      begin: Alignment(-.5, -3.5),
+                      end: Alignment(0, 3),
+                      colors: [
+                        Color(0xFFF80081),
+                        Color(0xFFFFCC00),
+                      ],
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'Disconnect ledger',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ],

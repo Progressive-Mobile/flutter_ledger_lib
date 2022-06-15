@@ -41,6 +41,7 @@ macos: target/x86_64-apple-darwin/release/libflutter_ledger_lib.dylib target/aar
 target/x86_64-apple-darwin/release/libflutter_ledger_lib.dylib: $(SOURCES)
 	@if [ $$(uname) == "Darwin" ] ; then \
 		cargo lipo --release --targets x86_64-apple-darwin ; \
+		cp target/x86_64-apple-darwin/release/libflutter_ledger_lib.dylib ../macos/libflutter_ledger_lib_x86_64.dylib ; \
 		else echo "Skipping macOS compilation on $$(uname)" ; \
 	fi
 	@echo "[DONE] $@"
@@ -48,6 +49,7 @@ target/x86_64-apple-darwin/release/libflutter_ledger_lib.dylib: $(SOURCES)
 target/aarch64-apple-darwin/release/libflutter_ledger_lib.dylib: $(SOURCES)
 	@if [ $$(uname) == "Darwin" ] ; then \
 		cargo lipo --release --targets aarch64-apple-darwin ; \
+		cp target/aarch64-apple-darwin/release/libflutter_ledger_lib.dylib ../macos/libflutter_ledger_lib_arch64.dylib ; \
 		else echo "Skipping macOS compilation on $$(uname)" ; \
 	fi
 	@echo "[DONE] $@"
