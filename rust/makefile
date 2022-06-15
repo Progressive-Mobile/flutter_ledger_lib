@@ -56,8 +56,7 @@ target/aarch64-apple-darwin/release/libflutter_ledger_lib.dylib: $(SOURCES)
 
 windows: $(SOURCES)
 	cargo build --target x86_64-pc-windows-gnu --release ; \
-	cp target/x86_64-pc-windows-gnu/release/flutter_ledger_lib.dll ../windows/include/flutter_ledger_lib.dll ; \
-	
+	cp target/x86_64-pc-windows-gnu/release/flutter_ledger_lib.dll ../windows/include/flutter_ledger_lib.dll ;
 	@echo "[DONE] $@"
 
 
