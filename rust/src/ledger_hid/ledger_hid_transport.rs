@@ -1,3 +1,5 @@
+use std::{ffi::CStr, os::raw::c_char};
+
 use ledger_transport::APDUCommand;
 use ledger_transport_hid::{hidapi::HidApi, TransportNativeHID};
 use serde::{Deserialize, Serialize};
@@ -12,13 +14,20 @@ pub struct LedgerHidTransport {
     _hid_api: HidApi,
 }
 
+#[derive(Clone, Default, Serialize, Deserialize)]
+pub struct LedgerDeviceInfo {
+    pub name: String,
+    pub path: String,
+}
+
 impl LedgerHidTransport {
-    pub fn new() -> Result<Self, String> {
+    pub unsafe fn new(path: *const c_char) -> Result<Self, String> {
         let hid_api = HidApi::new();
 
         match hid_api {
             Ok(hid_api) => {
-                let transport = TransportNativeHID::new(&hid_api);
+                let path = CStr::from_ptr(path);
+                let transport = TransportNativeHID::open_path(&hid_api, path);
                 match transport {
                     Ok(transport) => Ok(Self {
                         transport: transport,
@@ -53,6 +62,25 @@ impl LedgerHidTransport {
                 data: answer.apdu_data().to_vec(),
                 status_word: answer.retcode(),
             }),
+            Err(err) => Err(err.to_string()),
+        }
+    }
+
+    pub fn get_ledger_devices() -> Result<Vec<LedgerDeviceInfo>, String> {
+        let hid_api = HidApi::new();
+
+        match hid_api {
+            Ok(hid_api) => {
+                let devices = TransportNativeHID::list_ledgers(&hid_api);
+                let hid_devices: &mut Vec<LedgerDeviceInfo> = &mut vec![];
+                for device in devices {
+                    hid_devices.push(LedgerDeviceInfo {
+                        name: device.product_string().unwrap().to_string(),
+                        path: device.path().to_str().unwrap().to_string(),
+                    });
+                }
+                Ok(hid_devices.clone())
+            }
             Err(err) => Err(err.to_string()),
         }
     }

@@ -24,10 +24,22 @@ class LedgerTransport {
   @override
   LedgerTransport._();
 
-  static Future<LedgerTransport> create() async {
+  static Future<List<LedgerDevice>> getLedgerDevices() async {
+    final result = await executeAsync(
+      (port) => FlutterLedgerLib.bindings.get_ledger_devices(
+        port,
+      ),
+    );
+    final string = cStringToDart(result);
+    final json = jsonDecode(string) as List<dynamic>;
+
+    return json.map((e) => LedgerDevice.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  static Future<LedgerTransport> create(String path) async {
     final instance = LedgerTransport._();
     try {
-      await instance._initialize();
+      await instance._initialize(path);
       final name = await instance.getAppName();
       if (name == _ledgerSystemName) {
         await instance.freePtr();
@@ -61,9 +73,9 @@ class LedgerTransport {
         _ptr = null;
       });
 
-  Future<void> _initialize() => _lock.synchronized(() async {
+  Future<void> _initialize(String path) => _lock.synchronized(() async {
         final result = executeSync(
-          () => FlutterLedgerLib.bindings.create_ledger_transport(),
+          () => FlutterLedgerLib.bindings.create_ledger_transport(path.toNativeUtf8().cast<Char>()),
         );
 
         _ptr = Pointer.fromAddress(result).cast<Void>();

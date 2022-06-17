@@ -14,9 +14,33 @@ use crate::{
 use self::ledger_hid_transport::LedgerHidTransport;
 
 #[no_mangle]
-pub unsafe extern "C" fn create_ledger_transport() -> *mut c_void {
-    fn internal_fn() -> Result<u64, String> {
-        let transport = LedgerHidTransport::new();
+pub unsafe extern "C" fn get_ledger_devices(result_port: c_longlong) {
+    runtime!().spawn(async move {
+        fn internal_fn() -> Result<u64, String> {
+            let devices = LedgerHidTransport::get_ledger_devices();
+            match devices {
+                Ok(devices) => {
+                    let ptr = serde_json::to_string(&devices)
+                        .handle_error()?
+                        .to_cstring_ptr() as u64;
+
+                    Ok(ptr)
+                }
+
+                Err(err) => Err(err),
+            }
+        }
+
+        let result = internal_fn().match_result();
+
+        send_to_result_port(result_port, result);
+    });
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn create_ledger_transport(path: *const c_char) -> *mut c_void {
+    unsafe fn internal_fn(path: *const c_char) -> Result<u64, String> {
+        let transport = LedgerHidTransport::new(path);
 
         match transport {
             Ok(transport) => {
@@ -28,7 +52,7 @@ pub unsafe extern "C" fn create_ledger_transport() -> *mut c_void {
         }
     }
 
-    internal_fn().match_result()
+    internal_fn(path).match_result()
 }
 
 #[no_mangle]

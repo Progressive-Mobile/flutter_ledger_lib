@@ -21,6 +21,7 @@ class _MyAppState extends State<MyApp> {
   final keyNotifier = ValueNotifier<String?>(null);
   int keyIndex = 0;
   String errorText = '';
+  List<LedgerDevice> devices = [];
 
   @override
   void dispose() {
@@ -43,11 +44,25 @@ class _MyAppState extends State<MyApp> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               ElevatedButton(
-                onPressed: ledgerTransport == null ? connectLedger : null,
+                onPressed: getLedgers,
                 child: const Text(
-                  'Connect ledger',
+                  'Get ledgers',
                 ),
               ),
+              ...devices
+                  .map(
+                    (device) => TextButton(
+                      onPressed: ledgerTransport == null
+                          ? () => connectLedger(
+                                device.path,
+                              )
+                          : null,
+                      child: Text(
+                        device.name,
+                      ),
+                    ),
+                  )
+                  .toList(),
               ValueListenableBuilder<String?>(
                 valueListenable: keyNotifier,
                 builder: (context, value, _) => SizedBox(
@@ -121,29 +136,11 @@ class _MyAppState extends State<MyApp> {
                   'Get public key',
                 ),
               ),
-              GestureDetector(
-                onTap: ledgerTransport != null ? disconnectLedger : null,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                  width: 200,
-                  decoration: ShapeDecoration(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    gradient: const LinearGradient(
-                      begin: Alignment(-.5, -3.5),
-                      end: Alignment(0, 3),
-                      colors: [
-                        Color(0xFFF80081),
-                        Color(0xFFFFCC00),
-                      ],
-                    ),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'Disconnect ledger',
-                    style: TextStyle(color: Colors.white),
-                  ),
+              ElevatedButton(
+                onPressed: ledgerTransport != null ? disconnectLedger : null,
+                child: const Text(
+                  'Disconnect ledger',
+                  style: TextStyle(color: Colors.white),
                 ),
               ),
             ],
@@ -165,9 +162,9 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  Future<void> connectLedger() async {
+  Future<void> connectLedger(String path) async {
     try {
-      ledgerTransport = await LedgerTransport.create();
+      ledgerTransport = await LedgerTransport.create(path);
       setState(() {});
     } catch (err) {
       _mapError(err);
@@ -179,6 +176,13 @@ class _MyAppState extends State<MyApp> {
     keyNotifier.value = null;
     setState(() {
       ledgerTransport = null;
+    });
+  }
+
+  Future<void> getLedgers() async {
+    final a = await LedgerTransport.getLedgerDevices();
+    setState(() {
+      devices = [...a];
     });
   }
 }

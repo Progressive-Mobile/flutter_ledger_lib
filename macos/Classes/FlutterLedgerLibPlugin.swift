@@ -23,7 +23,7 @@ public class FlutterLedgerLibPlugin: NSObject, FlutterPlugin {
 
       free_cstring(nil)
 
-      create_ledger_transport()
+      create_ledger_transport(nil)
 
       ledger_transport_clone_ptr(nil)
 
@@ -32,5 +32,7 @@ public class FlutterLedgerLibPlugin: NSObject, FlutterPlugin {
       ledger_exchange(0, nil, 0, 0, 0, 0, nil)
 
       lb_store_dart_post_cobject(nil)
+
+      get_ledger_devices(0)
   }
 }

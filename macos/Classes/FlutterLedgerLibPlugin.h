@@ -4,7 +4,9 @@ void free_cstring(char *ptr);
 
 void lb_store_dart_post_cobject(void *ptr);
 
-void *create_ledger_transport(void);
+void get_ledger_devices(long long result_port);
+
+void *create_ledger_transport(const char *path);
 
 void *ledger_transport_clone_ptr(void *ptr);
 
