@@ -164,7 +164,10 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> connectLedger(String path) async {
     try {
-      ledgerTransport = await LedgerTransport.create(path);
+      ledgerTransport = await LedgerTransport.create(
+        path: path,
+        appName: 'Everscale',
+      );
       setState(() {});
     } catch (err) {
       _mapError(err);

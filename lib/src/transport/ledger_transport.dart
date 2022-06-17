@@ -36,12 +36,15 @@ class LedgerTransport {
     return json.map((e) => LedgerDevice.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  static Future<LedgerTransport> create(String path) async {
+  static Future<LedgerTransport> create({
+    required String path,
+    required String appName,
+  }) async {
     final instance = LedgerTransport._();
     try {
       await instance._initialize(path);
       final name = await instance.getAppName();
-      if (name == _ledgerSystemName) {
+      if (name != appName) {
         await instance.freePtr();
         throw const LedgerError.responseError(statusWord: StatusWord.appIsNotOpen);
       }
