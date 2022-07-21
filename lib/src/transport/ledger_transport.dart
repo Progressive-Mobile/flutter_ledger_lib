@@ -81,7 +81,7 @@ class LedgerTransport {
           () => FlutterLedgerLib.bindings.create_ledger_transport(path.toNativeUtf8().cast<Char>()),
         );
 
-        _ptr = Pointer.fromAddress(result).cast<Void>();
+        _ptr = toPtrFromAddress(result as String);
       });
 
   Future<String> getKey(int keyIndex, {bool verify = false}) async {

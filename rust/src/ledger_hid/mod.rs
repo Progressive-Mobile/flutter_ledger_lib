@@ -6,9 +6,11 @@ use std::{
     sync::Arc,
 };
 
+use allo_isolate::Isolate;
+
 use crate::{
     models::{HandleError, MatchResult, ToCStringPtr, ToStringFromPtr},
-    runtime, send_to_result_port, RUNTIME,
+    runtime, PostWithResult, ToPtrAddress, RUNTIME,
 };
 
 use self::ledger_hid_transport::LedgerHidTransport;
@@ -16,7 +18,7 @@ use self::ledger_hid_transport::LedgerHidTransport;
 #[no_mangle]
 pub unsafe extern "C" fn get_ledger_devices(result_port: c_longlong) {
     runtime!().spawn(async move {
-        fn internal_fn() -> Result<u64, String> {
+        fn internal_fn() -> Result<serde_json::Value, String> {
             let devices = LedgerHidTransport::get_ledger_devices();
             match devices {
                 Ok(devices) => {
@@ -24,7 +26,7 @@ pub unsafe extern "C" fn get_ledger_devices(result_port: c_longlong) {
                         .handle_error()?
                         .to_cstring_ptr() as u64;
 
-                    Ok(ptr)
+                    serde_json::to_value(ptr).handle_error()
                 }
 
                 Err(err) => Err(err),
@@ -33,20 +35,22 @@ pub unsafe extern "C" fn get_ledger_devices(result_port: c_longlong) {
 
         let result = internal_fn().match_result();
 
-        send_to_result_port(result_port, result);
+        Isolate::new(result_port)
+            .post_with_result(result.to_ptr_address())
+            .unwrap();
     });
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn create_ledger_transport(path: *const c_char) -> *mut c_void {
-    unsafe fn internal_fn(path: *const c_char) -> Result<u64, String> {
+pub unsafe extern "C" fn create_ledger_transport(path: *const c_char) -> *mut c_char {
+    unsafe fn internal_fn(path: *const c_char) -> Result<serde_json::Value, String> {
         let transport = LedgerHidTransport::new(path);
 
         match transport {
             Ok(transport) => {
-                let ptr = Box::into_raw(Box::new(Arc::new(transport))) as u64;
+                let ptr = Box::into_raw(Box::new(Arc::new(transport)));
 
-                Ok(ptr)
+                serde_json::to_value(ptr.to_ptr_address()).handle_error()
             }
             Err(err) => Err(err),
         }
@@ -86,7 +90,7 @@ pub unsafe extern "C" fn ledger_exchange(
             p1: c_int,
             p2: c_int,
             data: String,
-        ) -> Result<u64, String> {
+        ) -> Result<serde_json::Value, String> {
             let data = serde_json::from_str::<Vec<u8>>(&data)
                 .handle_error()?
                 .into_iter()
@@ -100,7 +104,7 @@ pub unsafe extern "C" fn ledger_exchange(
                         .handle_error()?
                         .to_cstring_ptr() as u64;
 
-                    Ok(result)
+                    serde_json::to_value(result).handle_error()
                 }
                 Err(err) => Err(err),
             }
@@ -108,6 +112,8 @@ pub unsafe extern "C" fn ledger_exchange(
 
         let result = internal_fn(transport, cla, ins, p1, p2, data).match_result();
 
-        send_to_result_port(result_port, result);
+        Isolate::new(result_port)
+            .post_with_result(result.to_ptr_address())
+            .unwrap();
     });
 }

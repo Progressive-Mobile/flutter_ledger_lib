@@ -1,12 +1,15 @@
-void free_execution_result(void *ptr);
 
 void free_cstring(char *ptr);
 
 void lb_store_dart_post_cobject(void *ptr);
 
+void *nt_cstring_to_void_ptr(char *ptr);
+
+void nt_free_cstring(char *ptr);
+
 void get_ledger_devices(long long result_port);
 
-void *create_ledger_transport(const char *path);
+char *create_ledger_transport(const char *path);
 
 void *ledger_transport_clone_ptr(void *ptr);
 

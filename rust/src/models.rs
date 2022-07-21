@@ -1,13 +1,19 @@
 use std::{
-    os::raw::{c_char, c_uint, c_ulonglong},
-    ffi::{c_void, CStr, CString},
+    ffi::{CStr, CString},
+    os::raw::c_char,
     ptr::null,
 };
 
-#[repr(C)]
-pub struct ExecutionResult {
-    pub status_code: c_uint,
-    pub payload: c_ulonglong,
+use serde::Serialize;
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase", tag = "type", content = "data")]
+pub enum ExecutionResult<T>
+where
+    T: Serialize,
+{
+    Ok(T),
+    Err(String),
 }
 
 enum ExecutionStatus {
@@ -79,23 +85,20 @@ where
 }
 
 pub trait MatchResult {
-    fn match_result(self) -> *mut c_void;
+    fn match_result(self) -> *mut c_char;
 }
 
-impl MatchResult for Result<u64, String> {
-    fn match_result(self) -> *mut c_void {
+impl<T> MatchResult for Result<T, String>
+where
+    T: Serialize,
+{
+    fn match_result(self) -> *mut c_char {
         let result = match self {
-            Ok(data) => ExecutionResult {
-                status_code: ExecutionStatus::Ok as c_uint,
-                payload: data as c_ulonglong,
-            },
-            Err(err) => ExecutionResult {
-                status_code: ExecutionStatus::Err as c_uint,
-                payload: err.to_cstring_ptr() as c_ulonglong,
-            },
+            Ok(ok) => ExecutionResult::Ok(ok),
+            Err(err) => ExecutionResult::Err(err),
         };
 
-        Box::into_raw(Box::new(result)) as *mut c_void
+        serde_json::to_string(&result).unwrap().to_cstring_ptr()
     }
 }
 

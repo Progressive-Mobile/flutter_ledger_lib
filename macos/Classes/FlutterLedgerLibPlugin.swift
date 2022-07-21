@@ -18,9 +18,6 @@ public class FlutterLedgerLibPlugin: NSObject, FlutterPlugin {
   }
 
   public func dummyMethodToEnforceBundling() {
-      // This will never be executed 
-      free_execution_result(nil)
-
       free_cstring(nil)
 
       create_ledger_transport(nil)
@@ -34,5 +31,9 @@ public class FlutterLedgerLibPlugin: NSObject, FlutterPlugin {
       lb_store_dart_post_cobject(nil)
 
       get_ledger_devices(0)
+
+      nt_cstring_to_void_ptr(nil);
+
+      nt_free_cstring(nil);
   }
 }
