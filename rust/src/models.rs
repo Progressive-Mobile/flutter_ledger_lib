@@ -16,11 +16,6 @@ where
     Err(String),
 }
 
-enum ExecutionStatus {
-    Ok,
-    Err,
-}
-
 pub trait ToCStringPtr {
     fn to_cstring_ptr(self) -> *mut c_char;
 }
