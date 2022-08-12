@@ -60,6 +60,7 @@ pub unsafe extern "C" fn ll_create_ledger_transport(path: *const c_char) -> *mut
 }
 #[no_mangle]
 pub unsafe extern "C" fn ll_ledger_transport_free_ptr(ptr: *mut c_void) {
+    println!("ll_ledger_transport_free_ptr");
     Box::from_raw(ptr as *mut Arc<LedgerHidTransport>);
 }
 

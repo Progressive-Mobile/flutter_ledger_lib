@@ -21,19 +21,27 @@ class LedgerTransport implements Finalizable {
   static const _insSign = 0x03;
   static const _ledgerSystemName = 'BOLOS';
 
-  final _lock = Lock();
   late Pointer<Void> _ptr;
 
   @override
-  LedgerTransport._();
+  LedgerTransport(
+    String path,
+  ) {
+    final result = executeSync(
+      () => FlutterLedgerLib.instance.bindings.ll_create_ledger_transport(path.toNativeUtf8().cast<Char>()),
+    );
+
+    _ptr = toPtrFromAddress(result as String);
+
+    _nativeFinalizer.attach(this, _ptr);
+  }
 
   static Future<LedgerTransport> create({
     required String path,
     required String appName,
   }) async {
-    final instance = LedgerTransport._();
+    final instance = LedgerTransport(path);
     try {
-      await instance._initialize(path);
       final name = await instance.getAppName();
       if (name != appName) {
         throw const LedgerError.responseError(statusWord: StatusWord.appIsNotOpen);
@@ -45,16 +53,6 @@ class LedgerTransport implements Finalizable {
       throw LedgerError.connectionError(origMessage: err.toString());
     }
   }
-
-  Future<void> _initialize(String path) => _lock.synchronized(() async {
-        final result = executeSync(
-          () => FlutterLedgerLib.instance.bindings.ll_create_ledger_transport(path.toNativeUtf8().cast<Char>()),
-        );
-
-        _ptr = toPtrFromAddress(result as String);
-
-        _nativeFinalizer.attach(this, _ptr);
-      });
 
   static Future<List<LedgerDevice>> getLedgerDevices() async {
     final result = await executeAsync(
