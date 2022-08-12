@@ -16,7 +16,7 @@ use crate::{
 use self::ledger_hid_transport::LedgerHidTransport;
 
 #[no_mangle]
-pub unsafe extern "C" fn get_ledger_devices(result_port: c_longlong) {
+pub unsafe extern "C" fn ll_get_ledger_devices(result_port: c_longlong) {
     runtime!().spawn(async move {
         fn internal_fn() -> Result<serde_json::Value, String> {
             let devices = LedgerHidTransport::get_ledger_devices();
@@ -42,7 +42,7 @@ pub unsafe extern "C" fn get_ledger_devices(result_port: c_longlong) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn create_ledger_transport(path: *const c_char) -> *mut c_char {
+pub unsafe extern "C" fn ll_create_ledger_transport(path: *const c_char) -> *mut c_char {
     unsafe fn internal_fn(path: *const c_char) -> Result<serde_json::Value, String> {
         let transport = LedgerHidTransport::new(path);
 
@@ -58,19 +58,13 @@ pub unsafe extern "C" fn create_ledger_transport(path: *const c_char) -> *mut c_
 
     internal_fn(path).match_result()
 }
-
 #[no_mangle]
-pub unsafe extern "C" fn ledger_transport_clone_ptr(ptr: *mut c_void) -> *mut c_void {
-    Arc::into_raw(Arc::clone(&*(ptr as *mut Arc<LedgerHidTransport>))) as *mut c_void
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn ledger_transport_free_ptr(ptr: *mut c_void) {
+pub unsafe extern "C" fn ll_ledger_transport_free_ptr(ptr: *mut c_void) {
     Box::from_raw(ptr as *mut Arc<LedgerHidTransport>);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn ledger_exchange(
+pub unsafe extern "C" fn ll_ledger_exchange(
     result_port: c_longlong,
     transport: *mut c_void,
     cla: c_int,
@@ -79,7 +73,7 @@ pub unsafe extern "C" fn ledger_exchange(
     p2: c_int,
     data: *mut c_char,
 ) {
-    let transport = Arc::from_raw(transport as *mut LedgerHidTransport);
+    let transport = (&*(transport as *mut Arc<LedgerHidTransport>)).clone();
     let data = data.to_string_from_ptr();
 
     runtime!().spawn(async move {

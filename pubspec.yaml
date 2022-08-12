@@ -9,7 +9,7 @@ environment:
 dependencies:
   convert: ^3.0.2
   eosdart: ^0.4.8
-  ffi: ^1.2.1
+  ffi: ^2.0.0
   flutter:
     sdk: flutter
   freezed_annotation: ^2.0.3
@@ -43,3 +43,7 @@ ffigen:
   headers:
     entry-points:
       - "rust/target/bindings.h"
+  functions:
+    symbol-address:
+      include:
+        - ".*_free_ptr"

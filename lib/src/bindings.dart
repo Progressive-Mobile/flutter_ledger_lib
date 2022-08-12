@@ -3,18 +3,17 @@ import 'dart:io';
 
 import 'bindings.g.dart';
 
-abstract class FlutterLedgerLib {
-  static Bindings? _bindings;
+class FlutterLedgerLib {
+  static FlutterLedgerLib? _instance;
 
-  static void initialize() {
-    final dylib = _dlOpenPlatformSpecific();
+  final Bindings? _bindings;
 
-    final postCObject = NativeApi.postCObject.cast<Void>();
+  FlutterLedgerLib._()
+      : _bindings = Bindings(_dlOpenPlatformSpecific())..ll_store_dart_post_cobject(NativeApi.postCObject.cast<Void>());
 
-    _bindings = Bindings(dylib)..lb_store_dart_post_cobject(postCObject);
-  }
+  static FlutterLedgerLib get instance => _instance ??= FlutterLedgerLib._();
 
-  static Bindings get bindings {
+  Bindings get bindings {
     if (_bindings != null) {
       return _bindings!;
     } else {

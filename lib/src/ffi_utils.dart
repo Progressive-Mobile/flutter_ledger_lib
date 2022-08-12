@@ -12,7 +12,7 @@ dynamic executeSync(Pointer<Char> Function() function) {
   final ptr = function();
   final string = ptr.cast<Utf8>().toDartString();
 
-  FlutterLedgerLib.bindings.nt_free_cstring(ptr);
+  FlutterLedgerLib.instance.bindings.ll_free_cstring(ptr);
 
   final json = jsonDecode(string) as Map<String, dynamic>;
   final executionResult = ExecutionResult.fromJson(json);
@@ -29,7 +29,7 @@ Future<dynamic> executeAsync(void Function(int port) function) async {
     final ptr = toPtrFromAddress(data).cast<Char>();
     final string = ptr.cast<Utf8>().toDartString();
 
-    FlutterLedgerLib.bindings.nt_free_cstring(ptr);
+    FlutterLedgerLib.instance.bindings.ll_free_cstring(ptr);
 
     final json = jsonDecode(string) as Map<String, dynamic>;
     final executionResult = ExecutionResult.fromJson(json);
@@ -54,7 +54,7 @@ String cStringToDart(int address) {
 
   final string = ptr.cast<Utf8>().toDartString();
 
-  FlutterLedgerLib.bindings.free_cstring(ptr);
+  FlutterLedgerLib.instance.bindings.ll_free_cstring(ptr);
 
   return string;
 }
@@ -68,4 +68,4 @@ String? optionalCStringToDart(int address) {
 }
 
 Pointer<Void> toPtrFromAddress(String address) =>
-    FlutterLedgerLib.bindings.nt_cstring_to_void_ptr(address.toNativeUtf8().cast<Char>());
+    FlutterLedgerLib.instance.bindings.ll_cstring_to_void_ptr(address.toNativeUtf8().cast<Char>());

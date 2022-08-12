@@ -26,12 +26,7 @@ macro_rules! runtime {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn free_cstring(ptr: *mut c_char) {
-    ptr.to_string_from_ptr();
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn lb_store_dart_post_cobject(ptr: *mut c_void) {
+pub unsafe extern "C" fn ll_store_dart_post_cobject(ptr: *mut c_void) {
     let ptr = transmute::<
         *mut c_void,
         unsafe extern "C" fn(port_id: DartPort, message: *mut DartCObject) -> bool,
@@ -41,12 +36,12 @@ pub unsafe extern "C" fn lb_store_dart_post_cobject(ptr: *mut c_void) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn nt_cstring_to_void_ptr(ptr: *mut c_char) -> *mut c_void {
+pub unsafe extern "C" fn ll_cstring_to_void_ptr(ptr: *mut c_char) -> *mut c_void {
     ptr.to_string_from_ptr().to_ptr_from_address::<c_void>()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn nt_free_cstring(ptr: *mut c_char) {
+pub unsafe extern "C" fn ll_free_cstring(ptr: *mut c_char) {
     ptr.to_string_from_ptr();
 }
 

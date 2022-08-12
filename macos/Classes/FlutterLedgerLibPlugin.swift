@@ -18,22 +18,18 @@ public class FlutterLedgerLibPlugin: NSObject, FlutterPlugin {
   }
 
   public func dummyMethodToEnforceBundling() {
-      free_cstring(nil)
+      ll_free_cstring(nil)
 
-      create_ledger_transport(nil)
+      ll_create_ledger_transport(nil)
 
-      ledger_transport_clone_ptr(nil)
+      ll_ledger_transport_free_ptr(nil)
 
-      ledger_transport_free_ptr(nil)
+      ll_ledger_exchange(0, nil, 0, 0, 0, 0, nil)
 
-      ledger_exchange(0, nil, 0, 0, 0, 0, nil)
+      ll_store_dart_post_cobject(nil)
 
-      lb_store_dart_post_cobject(nil)
+      ll_get_ledger_devices(0)
 
-      get_ledger_devices(0)
-
-      nt_cstring_to_void_ptr(nil);
-
-      nt_free_cstring(nil);
+      ll_cstring_to_void_ptr(nil);
   }
 }

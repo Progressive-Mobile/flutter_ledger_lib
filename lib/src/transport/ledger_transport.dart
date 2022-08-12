@@ -11,7 +11,9 @@ import '../extension/uint_extension.dart';
 import '../ffi_utils.dart';
 import 'ledger_response.dart';
 
-class LedgerTransport {
+final _nativeFinalizer = NativeFinalizer(FlutterLedgerLib.instance.bindings.addresses.ll_ledger_transport_free_ptr);
+
+class LedgerTransport implements Finalizable {
   static const _cla = 0xe0;
   static const _confCla = 0xb0;
   static const _insGetConf = 0x01;
@@ -20,21 +22,10 @@ class LedgerTransport {
   static const _ledgerSystemName = 'BOLOS';
 
   final _lock = Lock();
-  Pointer<Void>? _ptr;
+  late Pointer<Void> _ptr;
+
   @override
   LedgerTransport._();
-
-  static Future<List<LedgerDevice>> getLedgerDevices() async {
-    final result = await executeAsync(
-      (port) => FlutterLedgerLib.bindings.get_ledger_devices(
-        port,
-      ),
-    );
-    final string = cStringToDart(result);
-    final json = jsonDecode(string) as List<dynamic>;
-
-    return json.map((e) => LedgerDevice.fromJson(e as Map<String, dynamic>)).toList();
-  }
 
   static Future<LedgerTransport> create({
     required String path,
@@ -45,7 +36,6 @@ class LedgerTransport {
       await instance._initialize(path);
       final name = await instance.getAppName();
       if (name != appName) {
-        await instance.freePtr();
         throw const LedgerError.responseError(statusWord: StatusWord.appIsNotOpen);
       }
       return instance;
@@ -56,44 +46,37 @@ class LedgerTransport {
     }
   }
 
-  Future<Pointer<Void>> clonePtr() => _lock.synchronized(() {
-        if (_ptr == null) throw Exception('Ledger transport use after free');
-
-        final ptr = FlutterLedgerLib.bindings.ledger_transport_clone_ptr(
-          _ptr!,
-        );
-
-        return ptr;
-      });
-
-  Future<void> freePtr() => _lock.synchronized(() {
-        if (_ptr == null) return;
-
-        FlutterLedgerLib.bindings.ledger_transport_free_ptr(
-          _ptr!,
-        );
-
-        _ptr = null;
-      });
-
   Future<void> _initialize(String path) => _lock.synchronized(() async {
         final result = executeSync(
-          () => FlutterLedgerLib.bindings.create_ledger_transport(path.toNativeUtf8().cast<Char>()),
+          () => FlutterLedgerLib.instance.bindings.ll_create_ledger_transport(path.toNativeUtf8().cast<Char>()),
         );
 
         _ptr = toPtrFromAddress(result as String);
+
+        _nativeFinalizer.attach(this, _ptr);
       });
 
+  static Future<List<LedgerDevice>> getLedgerDevices() async {
+    final result = await executeAsync(
+      (port) => FlutterLedgerLib.instance.bindings.ll_get_ledger_devices(
+        port,
+      ),
+    );
+    final string = cStringToDart(result);
+    final json = jsonDecode(string) as List<dynamic>;
+
+    return json.map((e) => LedgerDevice.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
   Future<String> getKey(int keyIndex, {bool verify = false}) async {
-    final ptr = await clonePtr();
     final keyIndexRawValue = jsonEncode(keyIndex.toUint8List());
 
     return _executeLedgerQuery(
       () async {
         final result = await executeAsync(
-          (port) => FlutterLedgerLib.bindings.ledger_exchange(
+          (port) => FlutterLedgerLib.instance.bindings.ll_ledger_exchange(
             port,
-            ptr,
+            _ptr,
             _cla,
             _insGetPk,
             verify ? 0x01 : 0x00,
@@ -118,20 +101,19 @@ class LedgerTransport {
 
   Future<String> signMessage({
     required int keyIndex,
+    required List<int> message,
     required String address,
-    required String destination,
     required int decimals,
     required int amount,
     required String asset,
   }) async {
-    final ptr = await clonePtr();
     final assetRawBytes = Uint8List.fromList(asset.codeUnits);
     final list32 = List.generate(32 - assetRawBytes.length, (index) => 0);
     list32.insertAll(list32.length, assetRawBytes);
 
-    final parts = destination.split(':');
+    final parts = address.split(':');
     final workChainBytes = Uint8List.fromList([int.parse(parts[0])]);
-    final addressBytes = hex.decode(address);
+    // final addressBytes = hex.decode(address);
     final assetBytes = Uint8List.fromList(list32);
     final destinationBytes = hex.decode(parts[1]);
     final amountBytes = amount.toUint8List(8);
@@ -143,15 +125,15 @@ class LedgerTransport {
       decimals,
       ...workChainBytes,
       ...destinationBytes,
-      ...addressBytes,
+      ...message,
     ]));
 
     return _executeLedgerQuery(
       () async {
         final result = await executeAsync(
-          (port) => FlutterLedgerLib.bindings.ledger_exchange(
+          (port) => FlutterLedgerLib.instance.bindings.ll_ledger_exchange(
             port,
-            ptr,
+            _ptr,
             _cla,
             _insSign,
             0x00,
@@ -174,15 +156,14 @@ class LedgerTransport {
   }
 
   Future<String> getAppName() async {
-    final ptr = await clonePtr();
     final keyIndexRawValue = jsonEncode([]);
 
     return _executeLedgerQuery(
       () async {
         final result = await executeAsync(
-          (port) => FlutterLedgerLib.bindings.ledger_exchange(
+          (port) => FlutterLedgerLib.instance.bindings.ll_ledger_exchange(
             port,
-            ptr,
+            _ptr,
             _confCla,
             _insGetConf,
             0x00,

@@ -4,7 +4,6 @@ import 'dart:async';
 import 'package:flutter_ledger_lib/flutter_ledger_lib.dart';
 
 Future<void> main() async {
-  FlutterLedgerLib.initialize();
   runApp(const MyApp());
 }
 
@@ -22,15 +21,6 @@ class _MyAppState extends State<MyApp> {
   int keyIndex = 0;
   String errorText = '';
   List<LedgerDevice> devices = [];
-
-  @override
-  void dispose() {
-    if (isInit) {
-      ledgerTransport?.freePtr();
-    }
-
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +165,6 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> disconnectLedger() async {
-    await ledgerTransport?.freePtr();
     keyNotifier.value = null;
     setState(() {
       ledgerTransport = null;
