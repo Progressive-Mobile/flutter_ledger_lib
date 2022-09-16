@@ -111,10 +111,9 @@ class LedgerTransport implements Finalizable {
 
     final parts = address.split(':');
     final workChainBytes = Uint8List.fromList([int.parse(parts[0])]);
-    // final addressBytes = hex.decode(address);
     final assetBytes = Uint8List.fromList(list32);
     final destinationBytes = hex.decode(parts[1]);
-    final amountBytes = amount.toUint8List(8);
+    final amountBytes = amount.toUint8List(16);
 
     final data = jsonEncode(Uint8List.fromList([
       ...keyIndex.toUint8List(),
