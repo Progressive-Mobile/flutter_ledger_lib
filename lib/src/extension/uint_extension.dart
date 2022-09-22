@@ -7,7 +7,24 @@ extension UintList on int {
     var number1 = this;
     String charValues = '0123456789ABCDEF';
     String stringAnswer = '';
-    List<int> numericValues = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+    List<int> numericValues = [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ];
     int num2;
     List<int> ssc = List.generate(length * 2, (index) => 0);
     for (int i = 0; i < ssc.length; i++) {

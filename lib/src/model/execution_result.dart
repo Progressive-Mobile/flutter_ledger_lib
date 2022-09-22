@@ -16,5 +16,6 @@ class ExecutionResult with _$ExecutionResult {
         err: (data) => throw Exception(data),
       );
 
-  factory ExecutionResult.fromJson(Map<String, dynamic> json) => _$ExecutionResultFromJson(json);
+  factory ExecutionResult.fromJson(Map<String, dynamic> json) =>
+      _$ExecutionResultFromJson(json);
 }

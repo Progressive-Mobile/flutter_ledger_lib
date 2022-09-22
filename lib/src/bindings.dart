@@ -9,7 +9,8 @@ class FlutterLedgerLib {
   final Bindings? _bindings;
 
   FlutterLedgerLib._()
-      : _bindings = Bindings(_dlOpenPlatformSpecific())..ll_store_dart_post_cobject(NativeApi.postCObject.cast<Void>());
+      : _bindings = Bindings(_dlOpenPlatformSpecific())
+          ..ll_store_dart_post_cobject(NativeApi.postCObject.cast<Void>());
 
   static FlutterLedgerLib get instance => _instance ??= FlutterLedgerLib._();
 

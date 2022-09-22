@@ -44,7 +44,13 @@ Future<void> main(List<String> args) async {
 
   await execute(
     executable: 'flutter',
-    arguments: ['pub', 'run', 'build_runner', 'build', '--delete-conflicting-outputs'],
+    arguments: [
+      'pub',
+      'run',
+      'build_runner',
+      'build',
+      '--delete-conflicting-outputs'
+    ],
     workingDirectory: flutterProjectDirectory,
   );
 

@@ -4,14 +4,14 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 import 'package:convert/convert.dart';
-import 'package:synchronized/synchronized.dart';
 
 import '../../flutter_ledger_lib.dart';
 import '../extension/uint_extension.dart';
 import '../ffi_utils.dart';
 import 'ledger_response.dart';
 
-final _nativeFinalizer = NativeFinalizer(FlutterLedgerLib.instance.bindings.addresses.ll_ledger_transport_free_ptr);
+final _nativeFinalizer = NativeFinalizer(
+    FlutterLedgerLib.instance.bindings.addresses.ll_ledger_transport_free_ptr);
 
 class LedgerTransport implements Finalizable {
   static const _cla = 0xe0;
@@ -28,7 +28,8 @@ class LedgerTransport implements Finalizable {
     String path,
   ) {
     final result = executeSync(
-      () => FlutterLedgerLib.instance.bindings.ll_create_ledger_transport(path.toNativeUtf8().cast<Char>()),
+      () => FlutterLedgerLib.instance.bindings
+          .ll_create_ledger_transport(path.toNativeUtf8().cast<Char>()),
     );
 
     _ptr = toPtrFromAddress(result as String);
@@ -44,7 +45,8 @@ class LedgerTransport implements Finalizable {
     try {
       final name = await instance.getAppName();
       if (name != appName) {
-        throw const LedgerError.responseError(statusWord: StatusWord.appIsNotOpen);
+        throw const LedgerError.responseError(
+            statusWord: StatusWord.appIsNotOpen);
       }
       return instance;
     } on LedgerError {
@@ -63,7 +65,9 @@ class LedgerTransport implements Finalizable {
     final string = cStringToDart(result);
     final json = jsonDecode(string) as List<dynamic>;
 
-    return json.map((e) => LedgerDevice.fromJson(e as Map<String, dynamic>)).toList();
+    return json
+        .map((e) => LedgerDevice.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<String> getKey(int keyIndex, {bool verify = false}) async {
@@ -92,7 +96,9 @@ class LedgerTransport implements Finalizable {
 
         final key = response.data;
 
-        return key.isNotEmpty ? hex.encode(key.skip(1).take(key[0]).toList()) : '';
+        return key.isNotEmpty
+            ? hex.encode(key.skip(1).take(key[0]).toList())
+            : '';
       },
     );
   }
@@ -147,7 +153,9 @@ class LedgerTransport implements Finalizable {
         }
         final signature = response.data;
 
-        return signature.isNotEmpty ? hex.encode(signature.skip(1).take(signature[0]).toList()) : '';
+        return signature.isNotEmpty
+            ? hex.encode(signature.skip(1).take(signature[0]).toList())
+            : '';
       },
     );
   }
@@ -190,7 +198,8 @@ class LedgerTransport implements Finalizable {
     } on LedgerError {
       rethrow;
     } catch (err) {
-      throw const LedgerError.responseError(statusWord: StatusWord.unknownError);
+      throw const LedgerError.responseError(
+          statusWord: StatusWord.unknownError);
     }
   }
 }

@@ -68,4 +68,5 @@ String? optionalCStringToDart(int address) {
 }
 
 Pointer<Void> toPtrFromAddress(String address) =>
-    FlutterLedgerLib.instance.bindings.ll_cstring_to_void_ptr(address.toNativeUtf8().cast<Char>());
+    FlutterLedgerLib.instance.bindings
+        .ll_cstring_to_void_ptr(address.toNativeUtf8().cast<Char>());

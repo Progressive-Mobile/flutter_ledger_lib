@@ -11,5 +11,6 @@ class LedgerDevice with _$LedgerDevice {
     required String path,
   }) = _LedgerDevice;
 
-  factory LedgerDevice.fromJson(Map<String, dynamic> json) => _$LedgerDeviceFromJson(json);
+  factory LedgerDevice.fromJson(Map<String, dynamic> json) =>
+      _$LedgerDeviceFromJson(json);
 }
