@@ -1,6 +1,7 @@
 [package]
 name = "flutter_ledger_lib"
-version = "0.1.0"
+version = "1.0.0"
+authors = [ "Maxim Kuzin <maximkuzin862@gmail.com>" ]
 edition = "2021"
 
 [lib]

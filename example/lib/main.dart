@@ -156,7 +156,7 @@ class _MyAppState extends State<MyApp> {
     try {
       ledgerTransport = await LedgerTransport.create(
         path: path,
-        appName: 'Everscale',
+        appName: 'Your app name',
       );
       setState(() {});
     } catch (err) {

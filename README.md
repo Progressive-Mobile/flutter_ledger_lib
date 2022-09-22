@@ -1,15 +1,27 @@
 # flutter_ledger_lib
 
-A new Flutter plugin project.
+A Flutter plugin for interacting with Ledger Nane S/X. Supports MacOS and Windows.
 
-## Getting Started
+## Requirements
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+-   Rust
+-   LLVM
+-   NodeJS
 
-For help getting started with Flutter development, view the
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## How to build & run
+
+1. Install Rust
+
+2. Install LLVM
+
+3. Install NodeJS
+
+4. Add package to `pubspec.yaml` and run `flutter pub get` to load dependencies
+   
+5. Set correct llvm-path in `pubscpec.yaml` 
+
+6. Run build on package with following command  
+   `flutter pub run flutter_ledger_lib:build`
+
+
 

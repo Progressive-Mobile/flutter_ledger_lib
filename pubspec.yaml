@@ -1,6 +1,6 @@
 name: flutter_ledger_lib
-description: A new Flutter plugin project.
-version: 0.0.1
+description: A Flutter project for interacting with Ledger Nano devices.
+version: 1.0.0
 
 environment:
   sdk: ">=2.17.1 <3.0.0"
