@@ -1,5 +1,6 @@
 name: flutter_ledger_lib
 description: A Flutter project for interacting with Ledger Nano devices.
+homepage: https://github.com/Progressive-Mobile/flutter_ledger_lib
 version: 1.0.0
 
 environment:
